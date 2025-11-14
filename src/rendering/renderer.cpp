@@ -2,6 +2,7 @@
 #include "game/bsp.h"
 #include "raymath.h"
 #include "rlgl.h"
+#include <algorithm>
 
 namespace rendering {
 
@@ -181,6 +182,71 @@ void BasicRenderer::draw_textured_quad(const Vector3& v0, const Vector3& v1,
 
     rlEnd();
     rlSetTexture(0);
+}
+
+void BasicRenderer::render_sprites(const std::vector<Sprite>& sprites, const game::Camera& camera) {
+    if (sprites.empty()) {
+        return;
+    }
+
+    // Sort sprites by distance from camera (back to front for alpha blending)
+    struct SpriteDistance {
+        const Sprite* sprite;
+        float distance_sq;
+    };
+
+    std::vector<SpriteDistance> sorted_sprites;
+    sorted_sprites.reserve(sprites.size());
+
+    Vector3 cam_pos = camera.get_position();
+    for (const auto& sprite : sprites) {
+        float dx = sprite.position.x - cam_pos.x;
+        float dy = sprite.position.y - cam_pos.y;
+        float dz = sprite.position.z - cam_pos.z;
+        float dist_sq = dx * dx + dy * dy + dz * dz;
+        sorted_sprites.push_back({&sprite, dist_sq});
+    }
+
+    std::sort(sorted_sprites.begin(), sorted_sprites.end(),
+             [](const SpriteDistance& a, const SpriteDistance& b) {
+                 return a.distance_sq > b.distance_sq;  // Far to near
+             });
+
+    // Render sorted sprites
+    for (const auto& sd : sorted_sprites) {
+        render_sprite(*sd.sprite, camera);
+    }
+}
+
+void BasicRenderer::render_sprite(const Sprite& sprite, const game::Camera& camera) {
+    // Get camera forward and right vectors
+    Vector3 cam_pos = camera.get_position();
+    Vector3 cam_forward = camera.get_forward();
+    Vector3 cam_right = Vector3CrossProduct(cam_forward, {0.0f, 1.0f, 0.0f});
+    cam_right = Vector3Normalize(cam_right);
+
+    // Calculate sprite quad corners (billboard facing camera)
+    float half_width = sprite.width * 0.5f;
+    float anchor_offset = sprite.height * sprite.anchor_y;
+
+    Vector3 bottom_center = sprite.position;
+    bottom_center.y += anchor_offset;
+
+    Vector3 top_center = bottom_center;
+    top_center.y += sprite.height;
+
+    // Calculate quad corners
+    Vector3 bottom_left = Vector3Subtract(bottom_center, Vector3Scale(cam_right, half_width));
+    Vector3 bottom_right = Vector3Add(bottom_center, Vector3Scale(cam_right, half_width));
+    Vector3 top_left = Vector3Subtract(top_center, Vector3Scale(cam_right, half_width));
+    Vector3 top_right = Vector3Add(top_center, Vector3Scale(cam_right, half_width));
+
+    // Get texture
+    const Texture2D& texture = m_texture_manager->get_texture(sprite.texture_id);
+
+    // Draw billboard quad
+    draw_textured_quad(bottom_left, bottom_right, top_right, top_left,
+                      texture, 1.0f, 1.0f);
 }
 
 } // namespace rendering

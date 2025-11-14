@@ -3,8 +3,10 @@
 #include "game/level.h"
 #include "game/camera.h"
 #include "rendering/texture_manager.h"
+#include "rendering/sprite.h"
 #include "raylib.h"
 #include <memory>
+#include <vector>
 
 namespace rendering {
 
@@ -15,6 +17,7 @@ public:
 
     // Render a frame
     virtual void render(const game::Level& level, const game::Camera& camera) = 0;
+    virtual void render_sprites(const std::vector<Sprite>& sprites, const game::Camera& camera) = 0;
 
     // Clear screen
     virtual void begin_frame() = 0;
@@ -28,6 +31,7 @@ public:
     ~BasicRenderer() override = default;
 
     void render(const game::Level& level, const game::Camera& camera) override;
+    void render_sprites(const std::vector<Sprite>& sprites, const game::Camera& camera) override;
     void begin_frame() override;
     void end_frame() override;
 
@@ -37,6 +41,7 @@ private:
     void render_sector(const game::Sector& sector);
     void render_wall(const game::Sector& sector, const game::Wall& wall);
     void render_floor_ceiling(const game::Sector& sector);
+    void render_sprite(const Sprite& sprite, const game::Camera& camera);
 
     // Helper to draw a textured quad
     void draw_textured_quad(const Vector3& v0, const Vector3& v1,

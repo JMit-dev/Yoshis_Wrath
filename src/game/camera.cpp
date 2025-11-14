@@ -113,6 +113,10 @@ Camera3D Camera::to_raylib_camera() const {
     return camera;
 }
 
+Vector3 Camera::get_forward() const {
+    return Vector3Normalize(Vector3Subtract(m_target, m_position));
+}
+
 void Camera::update_target_from_angles() {
     // Calculate direction vector from yaw and pitch
     Vector3 direction;
