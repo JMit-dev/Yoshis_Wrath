@@ -8,7 +8,8 @@ namespace rendering {
 
 BasicRenderer::BasicRenderer()
     : m_texture_manager(std::make_unique<TextureManager>())
-    , m_hud(std::make_unique<HUD>()) {
+    , m_hud(std::make_unique<HUD>())
+    , m_sector_renderer(std::make_unique<SectorRenderer>(*m_texture_manager)) {
 }
 
 void BasicRenderer::begin_frame() {
@@ -34,7 +35,7 @@ void BasicRenderer::render(const game::Level& level, const game::Camera& camera)
     // Render visible sectors in BSP order
     for (uint32_t idx : visible_sectors) {
         if (idx < sectors.size()) {
-            render_sector(sectors[idx]);
+            m_sector_renderer->render_sector(sectors[idx]);
         }
     }
 
@@ -42,115 +43,6 @@ void BasicRenderer::render(const game::Level& level, const game::Camera& camera)
 
     // Draw HUD
     m_hud->render();
-}
-
-void BasicRenderer::render_sector(const game::Sector& sector) {
-    // Render walls first
-    for (const auto& wall : sector.walls) {
-        render_wall(sector, wall);
-    }
-
-    // Then floor/ceiling
-    render_floor_ceiling(sector);
-}
-
-void BasicRenderer::render_wall(const game::Sector& sector, const game::Wall& wall) {
-    // Skip walls that are portals (they're openings, not solid walls)
-    if (wall.portal_id >= 0) {
-        return;
-    }
-
-    const game::Vertex& v1 = sector.vertices[wall.vertex_a];
-    const game::Vertex& v2 = sector.vertices[wall.vertex_b];
-
-    // Wall corners
-    Vector3 bottom_left = {v1.x, sector.floor_height, v1.z};
-    Vector3 bottom_right = {v2.x, sector.floor_height, v2.z};
-    Vector3 top_left = {v1.x, sector.ceiling_height, v1.z};
-    Vector3 top_right = {v2.x, sector.ceiling_height, v2.z};
-
-    // Get texture
-    const Texture2D& texture = m_texture_manager->get_texture(wall.texture_id);
-
-    // Calculate wall length for UV scaling
-    float wall_length = sqrtf(
-        (v2.x - v1.x) * (v2.x - v1.x) +
-        (v2.z - v1.z) * (v2.z - v1.z)
-    );
-    float wall_height = sector.ceiling_height - sector.floor_height;
-
-    // Draw textured quad
-    draw_textured_quad(bottom_left, bottom_right, top_right, top_left,
-                      texture, wall_length, wall_height);
-
-    // Draw wireframe outline for debugging (optional)
-    // DrawLine3D(bottom_left, bottom_right, DARKGRAY);
-    // DrawLine3D(bottom_left, top_left, DARKGRAY);
-    // DrawLine3D(top_left, top_right, DARKGRAY);
-    // DrawLine3D(bottom_right, top_right, DARKGRAY);
-}
-
-void BasicRenderer::render_floor_ceiling(const game::Sector& sector) {
-    // For now, render as a simple quad (assumes rectangular room)
-    if (sector.vertices.size() != 4) {
-        return;  // Skip non-rectangular sectors for now
-    }
-
-    // Get textures
-    const Texture2D& floor_tex = m_texture_manager->get_texture(sector.floor_texture);
-    const Texture2D& ceil_tex = m_texture_manager->get_texture(sector.ceiling_texture);
-
-    // Floor corners
-    Vector3 floor_v0 = {sector.vertices[0].x, sector.floor_height, sector.vertices[0].z};
-    Vector3 floor_v1 = {sector.vertices[1].x, sector.floor_height, sector.vertices[1].z};
-    Vector3 floor_v2 = {sector.vertices[2].x, sector.floor_height, sector.vertices[2].z};
-    Vector3 floor_v3 = {sector.vertices[3].x, sector.floor_height, sector.vertices[3].z};
-
-    // Ceiling corners
-    Vector3 ceil_v0 = {sector.vertices[0].x, sector.ceiling_height, sector.vertices[0].z};
-    Vector3 ceil_v1 = {sector.vertices[1].x, sector.ceiling_height, sector.vertices[1].z};
-    Vector3 ceil_v2 = {sector.vertices[2].x, sector.ceiling_height, sector.vertices[2].z};
-    Vector3 ceil_v3 = {sector.vertices[3].x, sector.ceiling_height, sector.vertices[3].z};
-
-    // Draw floor - only the TOP face (viewed from above/inside)
-    rlSetTexture(floor_tex.id);
-    rlBegin(RL_QUADS);
-    rlColor4ub(139, 69, 19, 255);  // Brown for floor
-
-    rlTexCoord2f(0.0f, 0.0f);
-    rlVertex3f(floor_v0.x, floor_v0.y, floor_v0.z);
-
-    rlTexCoord2f(0.0f, 1.0f);
-    rlVertex3f(floor_v3.x, floor_v3.y, floor_v3.z);
-
-    rlTexCoord2f(1.0f, 1.0f);
-    rlVertex3f(floor_v2.x, floor_v2.y, floor_v2.z);
-
-    rlTexCoord2f(1.0f, 0.0f);
-    rlVertex3f(floor_v1.x, floor_v1.y, floor_v1.z);
-
-    rlEnd();
-    rlSetTexture(0);
-
-    // Draw ceiling - only the BOTTOM face (viewed from below/inside)
-    rlSetTexture(ceil_tex.id);
-    rlBegin(RL_QUADS);
-    rlColor4ub(169, 169, 169, 255);  // Gray for ceiling
-
-    rlTexCoord2f(0.0f, 0.0f);
-    rlVertex3f(ceil_v0.x, ceil_v0.y, ceil_v0.z);
-
-    rlTexCoord2f(1.0f, 0.0f);
-    rlVertex3f(ceil_v1.x, ceil_v1.y, ceil_v1.z);
-
-    rlTexCoord2f(1.0f, 1.0f);
-    rlVertex3f(ceil_v2.x, ceil_v2.y, ceil_v2.z);
-
-    rlTexCoord2f(0.0f, 1.0f);
-    rlVertex3f(ceil_v3.x, ceil_v3.y, ceil_v3.z);
-
-    rlEnd();
-    rlSetTexture(0);
 }
 
 void BasicRenderer::draw_textured_quad(const Vector3& v0, const Vector3& v1,

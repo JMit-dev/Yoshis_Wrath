@@ -5,6 +5,7 @@
 #include "rendering/texture_manager.h"
 #include "rendering/sprite.h"
 #include "rendering/hud.h"
+#include "rendering/sector_renderer.h"
 #include "raylib.h"
 #include <memory>
 #include <vector>
@@ -39,13 +40,11 @@ public:
 private:
     std::unique_ptr<TextureManager> m_texture_manager;
     std::unique_ptr<HUD> m_hud;
+    std::unique_ptr<SectorRenderer> m_sector_renderer;
 
-    void render_sector(const game::Sector& sector);
-    void render_wall(const game::Sector& sector, const game::Wall& wall);
-    void render_floor_ceiling(const game::Sector& sector);
     void render_sprite(const Sprite& sprite, const game::Camera& camera);
 
-    // Helper to draw a textured quad
+    // Helper to draw a textured quad for sprites
     void draw_textured_quad(const Vector3& v0, const Vector3& v1,
                            const Vector3& v2, const Vector3& v3,
                            const Texture2D& texture,
