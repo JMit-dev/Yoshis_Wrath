@@ -55,6 +55,11 @@ void BasicRenderer::render_sector(const game::Sector& sector) {
 }
 
 void BasicRenderer::render_wall(const game::Sector& sector, const game::Wall& wall) {
+    // Skip walls that are portals (they're openings, not solid walls)
+    if (wall.portal_id >= 0) {
+        return;
+    }
+
     const game::Vertex& v1 = sector.vertices[wall.vertex_a];
     const game::Vertex& v2 = sector.vertices[wall.vertex_b];
 

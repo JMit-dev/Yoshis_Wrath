@@ -64,33 +64,74 @@ bool Level::point_in_sector(const Sector& sector, float x, float z) const {
 Level Level::create_test_level() {
     Level level;
 
-    // Create a simple rectangular room
-    Sector room;
-    room.floor_height = 0.0f;
-    room.ceiling_height = 3.0f;
-    room.floor_texture = 0;
-    room.ceiling_texture = 0;
-    room.light_level = 1.0f;
+    // Create first room (starting room)
+    Sector room1;
+    room1.floor_height = 0.0f;
+    room1.ceiling_height = 3.0f;
+    room1.floor_texture = 0;
+    room1.ceiling_texture = 0;
+    room1.light_level = 1.0f;
 
-    // Room vertices (10x10 room)
-    room.vertices.push_back(Vertex(-5.0f, -5.0f));
-    room.vertices.push_back(Vertex(5.0f, -5.0f));
-    room.vertices.push_back(Vertex(5.0f, 5.0f));
-    room.vertices.push_back(Vertex(-5.0f, 5.0f));
+    // Room 1 vertices (10x10 room)
+    room1.vertices.push_back(Vertex(-5.0f, -5.0f));  // 0
+    room1.vertices.push_back(Vertex(5.0f, -5.0f));   // 1
+    room1.vertices.push_back(Vertex(5.0f, 5.0f));    // 2
+    room1.vertices.push_back(Vertex(-5.0f, 5.0f));   // 3
 
-    // Room walls
+    // Room 1 walls - wall 1 (right side) will be a portal
     for (size_t i = 0; i < 4; ++i) {
         Wall wall;
         wall.vertex_a = static_cast<uint32_t>(i);
         wall.vertex_b = static_cast<uint32_t>((i + 1) % 4);
         wall.texture_id = 0;
-        wall.portal_id = -1;  // Solid wall
-        room.walls.push_back(wall);
+        // Wall 1 (right side) is a portal to room 2
+        wall.portal_id = (i == 1) ? 0 : -1;
+        room1.walls.push_back(wall);
     }
 
-    level.add_sector(room);
+    level.add_sector(room1);
 
-    // Add player spawn point in the center
+    // Create second room (connected via portal)
+    Sector room2;
+    room2.floor_height = 0.0f;
+    room2.ceiling_height = 3.0f;
+    room2.floor_texture = 0;
+    room2.ceiling_texture = 0;
+    room2.light_level = 1.0f;
+
+    // Room 2 vertices (8x10 room, connected to right side of room1)
+    room2.vertices.push_back(Vertex(5.0f, -5.0f));   // 0 (shared with room1)
+    room2.vertices.push_back(Vertex(13.0f, -5.0f));  // 1
+    room2.vertices.push_back(Vertex(13.0f, 5.0f));   // 2
+    room2.vertices.push_back(Vertex(5.0f, 5.0f));    // 3 (shared with room1)
+
+    // Room 2 walls - wall 3 (left side) will be portal back to room 1
+    for (size_t i = 0; i < 4; ++i) {
+        Wall wall;
+        wall.vertex_a = static_cast<uint32_t>(i);
+        wall.vertex_b = static_cast<uint32_t>((i + 1) % 4);
+        wall.texture_id = 0;
+        // Wall 3 (left side) is a portal back to room 1
+        wall.portal_id = (i == 3) ? 1 : -1;
+        room2.walls.push_back(wall);
+    }
+
+    level.add_sector(room2);
+
+    // Create portal connections
+    Portal portal1;
+    portal1.target_sector = 1;
+    portal1.floor_height = 0.0f;
+    portal1.ceiling_height = 3.0f;
+    level.add_portal(portal1);
+
+    Portal portal2;
+    portal2.target_sector = 0;
+    portal2.floor_height = 0.0f;
+    portal2.ceiling_height = 3.0f;
+    level.add_portal(portal2);
+
+    // Add player spawn point in center of first room
     EntitySpawn player_spawn;
     player_spawn.position = {0.0f, 1.7f, 0.0f};
     player_spawn.entity_type = 0;  // Player
