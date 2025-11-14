@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Sprite Definition",
+  "description": "Schema for sprite animation definitions in Yoshi's Wrath",
+  "type": "object",
+  "required": ["name", "atlas", "frame_width", "frame_height", "frames_horizontal", "frames_vertical", "animations", "default_animation"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Unique identifier for this sprite"
+    },
+    "atlas": {
+      "type": "string",
+      "description": "Path to the sprite sheet image relative to assets folder"
+    },
+    "frame_width": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Width of each frame in pixels"
+    },
+    "frame_height": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Height of each frame in pixels"
+    },
+    "frames_horizontal": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of frames arranged horizontally in the sprite sheet"
+    },
+    "frames_vertical": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of frames arranged vertically in the sprite sheet"
+    },
+    "animations": {
+      "type": "object",
+      "description": "Collection of named animations",
+      "patternProperties": {
+        "^[a-zA-Z_][a-zA-Z0-9_]*$": {
+          "$ref": "#/definitions/animation"
+        }
+      }
+    },
+    "default_animation": {
+      "type": "string",
+      "description": "Name of the animation to play by default"
+    }
+  },
+  "definitions": {
+    "animation": {
+      "type": "object",
+      "required": ["frames", "looping"],
+      "properties": {
+        "frames": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "minItems": 1,
+          "description": "Sequence of frame indices to play"
+        },
+        "frame_duration": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Duration in seconds for each frame (used when use_per_frame_timing is false or absent)"
+        },
+        "per_frame_durations": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "description": "Individual duration for each frame (must match length of frames array)"
+        },
+        "use_per_frame_timing": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, use per_frame_durations instead of frame_duration"
+        },
+        "looping": {
+          "type": "boolean",
+          "description": "Whether the animation should loop"
+        },
+        "interruptible": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether this animation can be interrupted by another animation"
+        },
+        "cooldown": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0,
+          "description": "Time in seconds before this animation can be played again after finishing"
+        }
+      }
+    }
+  }
+}

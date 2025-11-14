@@ -1,4 +1,5 @@
 {
+  "$schema": "../schemas/sprite_schema.json",
   "name": "weapon_fist",
   "atlas": "sprites/weapon_fist_sheet.png",
   "frame_width": 128,
@@ -14,9 +15,11 @@
     },
     "punch": {
       "frames": [0, 1, 2, 3, 2, 1, 0],
-      "frame_duration": 0.05,
+      "per_frame_durations": [0.03, 0.04, 0.05, 0.08, 0.05, 0.04, 0.03],
+      "use_per_frame_timing": true,
       "looping": false,
-      "interruptible": false
+      "interruptible": false,
+      "cooldown": 0.2
     }
   },
   "default_animation": "idle"

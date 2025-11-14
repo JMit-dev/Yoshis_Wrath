@@ -25,6 +25,13 @@ void AnimationController::play(const std::string& animation_name, bool restart_i
         return;
     }
 
+    // Check if animation is on cooldown
+    auto cooldown_it = m_cooldown_timers.find(animation_name);
+    if (cooldown_it != m_cooldown_timers.end() && cooldown_it->second > 0.0f) {
+        // Animation is on cooldown, can't play yet
+        return;
+    }
+
     // Check if current animation can be interrupted
     if (m_playing && !m_current_animation.empty()) {
         auto current_it = m_animations.find(m_current_animation);
@@ -43,6 +50,16 @@ void AnimationController::play(const std::string& animation_name, bool restart_i
 }
 
 void AnimationController::update(float delta_time) {
+    // Update cooldown timers
+    for (auto& pair : m_cooldown_timers) {
+        if (pair.second > 0.0f) {
+            pair.second -= delta_time;
+            if (pair.second < 0.0f) {
+                pair.second = 0.0f;
+            }
+        }
+    }
+
     if (!m_playing) {
         return;
     }
@@ -57,9 +74,15 @@ void AnimationController::update(float delta_time) {
     // Update time
     m_time += delta_time;
 
+    // Get current frame duration (either per-frame or global)
+    float current_frame_duration = anim.frame_duration;
+    if (anim.use_per_frame_timing && m_current_frame_index < static_cast<int>(anim.per_frame_durations.size())) {
+        current_frame_duration = anim.per_frame_durations[m_current_frame_index];
+    }
+
     // Check if we need to advance frame
-    if (m_time >= anim.frame_duration) {
-        m_time -= anim.frame_duration;
+    if (m_time >= current_frame_duration) {
+        m_time -= current_frame_duration;
         m_current_frame_index++;
 
         // Check if animation finished
@@ -71,6 +94,11 @@ void AnimationController::update(float delta_time) {
                 m_current_frame_index = static_cast<int>(anim.frames.size()) - 1;
                 m_playing = false;
                 m_finished = true;
+
+                // Start cooldown timer for this animation
+                if (anim.cooldown > 0.0f) {
+                    m_cooldown_timers[m_current_animation] = anim.cooldown;
+                }
             }
         }
     }

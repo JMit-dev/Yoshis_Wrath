@@ -22,9 +22,14 @@ set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
 add_subdirectory(external/raylib)
 
+# JSON library configuration
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+add_subdirectory(external/json)
+
 # Include directories
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/raylib/src)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/json/include)
 
 # Collect source files
 file(GLOB_RECURSE GAME_SOURCES
@@ -36,7 +41,7 @@ list(FILTER GAME_SOURCES EXCLUDE REGEX ".*editor.*")
 
 # Main game executable
 add_executable(yoshis_wrath ${GAME_SOURCES})
-target_link_libraries(yoshis_wrath PRIVATE raylib)
+target_link_libraries(yoshis_wrath PRIVATE raylib nlohmann_json::nlohmann_json)
 
 # Set assets path - use relative path for both dev and release
 target_compile_definitions(yoshis_wrath PUBLIC

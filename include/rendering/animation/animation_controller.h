@@ -9,15 +9,20 @@ namespace rendering {
 // Represents a single animation sequence
 struct Animation {
     std::string name;
-    std::vector<int> frames;     // Frame indices in the atlas
-    float frame_duration;         // Duration per frame in seconds
+    std::vector<int> frames;           // Frame indices in the atlas
+    float frame_duration;               // Default duration per frame in seconds (if not using per_frame_durations)
+    std::vector<float> per_frame_durations;  // Optional: individual duration for each frame
+    bool use_per_frame_timing;          // If true, use per_frame_durations instead of frame_duration
     bool looping;
-    bool interruptible;           // Can this animation be interrupted by another?
+    bool interruptible;                 // Can this animation be interrupted by another?
+    float cooldown;                     // Time in seconds before animation can be played again
 
     Animation()
         : frame_duration(0.1f)
+        , use_per_frame_timing(false)
         , looping(true)
-        , interruptible(true) {
+        , interruptible(true)
+        , cooldown(0.0f) {
     }
 };
 
@@ -50,6 +55,7 @@ public:
 
 private:
     std::map<std::string, Animation> m_animations;
+    std::map<std::string, float> m_cooldown_timers;  // Tracks remaining cooldown time per animation
     std::string m_current_animation;
     float m_time;
     int m_current_frame_index;
