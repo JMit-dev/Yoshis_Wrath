@@ -12,10 +12,12 @@ struct Animation {
     std::vector<int> frames;     // Frame indices in the atlas
     float frame_duration;         // Duration per frame in seconds
     bool looping;
+    bool interruptible;           // Can this animation be interrupted by another?
 
     Animation()
         : frame_duration(0.1f)
-        , looping(true) {
+        , looping(true)
+        , interruptible(true) {
     }
 };
 

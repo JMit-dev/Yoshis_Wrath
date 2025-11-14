@@ -9,12 +9,14 @@
     "idle": {
       "frames": [0],
       "frame_duration": 0.1,
-      "looping": true
+      "looping": true,
+      "interruptible": true
     },
     "punch": {
       "frames": [0, 1, 2, 3, 2, 1, 0],
       "frame_duration": 0.05,
-      "looping": false
+      "looping": false,
+      "interruptible": false
     }
   },
   "default_animation": "idle"

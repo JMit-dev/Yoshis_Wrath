@@ -20,6 +20,7 @@ bool WeaponSprite::load_from_json(const std::string& json_path) {
     idle_anim.frames = {0};
     idle_anim.frame_duration = 0.1f;
     idle_anim.looping = true;
+    idle_anim.interruptible = true;
     m_sprite->get_animation_controller().add_animation("idle", idle_anim);
 
     Animation punch_anim;
@@ -27,6 +28,7 @@ bool WeaponSprite::load_from_json(const std::string& json_path) {
     punch_anim.frames = {0, 1, 2, 3, 2, 1, 0};
     punch_anim.frame_duration = 0.05f;
     punch_anim.looping = false;
+    punch_anim.interruptible = false;  // Cannot interrupt punch animation
     m_sprite->get_animation_controller().add_animation("punch", punch_anim);
 
     // Start with idle animation

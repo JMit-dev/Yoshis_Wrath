@@ -25,6 +25,15 @@ void AnimationController::play(const std::string& animation_name, bool restart_i
         return;
     }
 
+    // Check if current animation can be interrupted
+    if (m_playing && !m_current_animation.empty()) {
+        auto current_it = m_animations.find(m_current_animation);
+        if (current_it != m_animations.end() && !current_it->second.interruptible) {
+            // Current animation is non-interruptible, don't switch
+            return;
+        }
+    }
+
     // Start new animation
     m_current_animation = animation_name;
     m_time = 0.0f;
