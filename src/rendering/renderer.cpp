@@ -1,10 +1,12 @@
 #include "rendering/renderer.h"
 #include "game/bsp.h"
 #include "raymath.h"
+#include "rlgl.h"
 
 namespace rendering {
 
-BasicRenderer::BasicRenderer() {
+BasicRenderer::BasicRenderer()
+    : m_texture_manager(std::make_unique<TextureManager>()) {
 }
 
 void BasicRenderer::begin_frame() {
@@ -23,26 +25,16 @@ void BasicRenderer::render(const game::Level& level, const game::Camera& camera)
 
     const auto& sectors = level.get_sectors();
 
-    // Use BSP tree if available for optimized rendering
-    if (level.get_bsp_tree() && level.get_bsp_tree()->is_built()) {
-        std::vector<uint32_t> visible_sectors;
-        level.get_bsp_tree()->get_visible_sectors(camera.get_position(), visible_sectors);
+    // Use BSP tree for optimized rendering
+    std::vector<uint32_t> visible_sectors;
+    level.get_bsp_tree()->get_visible_sectors(camera.get_position(), visible_sectors);
 
-        // Render visible sectors in BSP order
-        for (uint32_t idx : visible_sectors) {
-            if (idx < sectors.size()) {
-                render_sector(sectors[idx]);
-            }
-        }
-    } else {
-        // Fallback: render all sectors
-        for (const auto& sector : sectors) {
-            render_sector(sector);
+    // Render visible sectors in BSP order
+    for (uint32_t idx : visible_sectors) {
+        if (idx < sectors.size()) {
+            render_sector(sectors[idx]);
         }
     }
-
-    // Draw a grid for reference
-    DrawGrid(20, 1.0f);
 
     EndMode3D();
 
@@ -53,12 +45,13 @@ void BasicRenderer::render(const game::Level& level, const game::Camera& camera)
 }
 
 void BasicRenderer::render_sector(const game::Sector& sector) {
-    render_floor_ceiling(sector);
-
-    // Render walls
+    // Render walls first
     for (const auto& wall : sector.walls) {
         render_wall(sector, wall);
     }
+
+    // Then floor/ceiling
+    render_floor_ceiling(sector);
 }
 
 void BasicRenderer::render_wall(const game::Sector& sector, const game::Wall& wall) {
@@ -71,44 +64,118 @@ void BasicRenderer::render_wall(const game::Sector& sector, const game::Wall& wa
     Vector3 top_left = {v1.x, sector.ceiling_height, v1.z};
     Vector3 top_right = {v2.x, sector.ceiling_height, v2.z};
 
-    // Choose color based on whether it's a portal
-    Color wall_color = (wall.portal_id >= 0) ? BLUE : GRAY;
+    // Get texture
+    const Texture2D& texture = m_texture_manager->get_texture(wall.texture_id);
 
-    // Draw wall as two triangles
-    DrawTriangle3D(bottom_left, top_left, top_right, wall_color);
-    DrawTriangle3D(bottom_left, top_right, bottom_right, wall_color);
+    // Calculate wall length for UV scaling
+    float wall_length = sqrtf(
+        (v2.x - v1.x) * (v2.x - v1.x) +
+        (v2.z - v1.z) * (v2.z - v1.z)
+    );
+    float wall_height = sector.ceiling_height - sector.floor_height;
 
-    // Draw wireframe outline
-    DrawLine3D(bottom_left, bottom_right, DARKGRAY);
-    DrawLine3D(bottom_left, top_left, DARKGRAY);
-    DrawLine3D(top_left, top_right, DARKGRAY);
-    DrawLine3D(bottom_right, top_right, DARKGRAY);
+    // Draw textured quad
+    draw_textured_quad(bottom_left, bottom_right, top_right, top_left,
+                      texture, wall_length, wall_height);
+
+    // Draw wireframe outline for debugging (optional)
+    // DrawLine3D(bottom_left, bottom_right, DARKGRAY);
+    // DrawLine3D(bottom_left, top_left, DARKGRAY);
+    // DrawLine3D(top_left, top_right, DARKGRAY);
+    // DrawLine3D(bottom_right, top_right, DARKGRAY);
 }
 
 void BasicRenderer::render_floor_ceiling(const game::Sector& sector) {
-    // Simple triangulation of sector polygon (assumes convex sector)
-    if (sector.vertices.size() < 3) {
-        return;
+    // For now, render as a simple quad (assumes rectangular room)
+    if (sector.vertices.size() != 4) {
+        return;  // Skip non-rectangular sectors for now
     }
 
-    const game::Vertex& center = sector.vertices[0];
+    // Get textures
+    const Texture2D& floor_tex = m_texture_manager->get_texture(sector.floor_texture);
+    const Texture2D& ceil_tex = m_texture_manager->get_texture(sector.ceiling_texture);
 
-    for (size_t i = 1; i < sector.vertices.size() - 1; ++i) {
-        const game::Vertex& v1 = sector.vertices[i];
-        const game::Vertex& v2 = sector.vertices[i + 1];
+    // Floor corners
+    Vector3 floor_v0 = {sector.vertices[0].x, sector.floor_height, sector.vertices[0].z};
+    Vector3 floor_v1 = {sector.vertices[1].x, sector.floor_height, sector.vertices[1].z};
+    Vector3 floor_v2 = {sector.vertices[2].x, sector.floor_height, sector.vertices[2].z};
+    Vector3 floor_v3 = {sector.vertices[3].x, sector.floor_height, sector.vertices[3].z};
 
-        // Floor triangle
-        Vector3 floor_p0 = {center.x, sector.floor_height, center.z};
-        Vector3 floor_p1 = {v1.x, sector.floor_height, v1.z};
-        Vector3 floor_p2 = {v2.x, sector.floor_height, v2.z};
-        DrawTriangle3D(floor_p0, floor_p1, floor_p2, DARKBROWN);
+    // Ceiling corners
+    Vector3 ceil_v0 = {sector.vertices[0].x, sector.ceiling_height, sector.vertices[0].z};
+    Vector3 ceil_v1 = {sector.vertices[1].x, sector.ceiling_height, sector.vertices[1].z};
+    Vector3 ceil_v2 = {sector.vertices[2].x, sector.ceiling_height, sector.vertices[2].z};
+    Vector3 ceil_v3 = {sector.vertices[3].x, sector.ceiling_height, sector.vertices[3].z};
 
-        // Ceiling triangle
-        Vector3 ceil_p0 = {center.x, sector.ceiling_height, center.z};
-        Vector3 ceil_p1 = {v1.x, sector.ceiling_height, v1.z};
-        Vector3 ceil_p2 = {v2.x, sector.ceiling_height, v2.z};
-        DrawTriangle3D(ceil_p2, ceil_p1, ceil_p0, DARKGRAY);  // Reversed for proper culling
-    }
+    // Draw floor - only the TOP face (viewed from above/inside)
+    rlSetTexture(floor_tex.id);
+    rlBegin(RL_QUADS);
+    rlColor4ub(139, 69, 19, 255);  // Brown for floor
+
+    rlTexCoord2f(0.0f, 0.0f);
+    rlVertex3f(floor_v0.x, floor_v0.y, floor_v0.z);
+
+    rlTexCoord2f(0.0f, 1.0f);
+    rlVertex3f(floor_v3.x, floor_v3.y, floor_v3.z);
+
+    rlTexCoord2f(1.0f, 1.0f);
+    rlVertex3f(floor_v2.x, floor_v2.y, floor_v2.z);
+
+    rlTexCoord2f(1.0f, 0.0f);
+    rlVertex3f(floor_v1.x, floor_v1.y, floor_v1.z);
+
+    rlEnd();
+    rlSetTexture(0);
+
+    // Draw ceiling - only the BOTTOM face (viewed from below/inside)
+    rlSetTexture(ceil_tex.id);
+    rlBegin(RL_QUADS);
+    rlColor4ub(169, 169, 169, 255);  // Gray for ceiling
+
+    rlTexCoord2f(0.0f, 0.0f);
+    rlVertex3f(ceil_v0.x, ceil_v0.y, ceil_v0.z);
+
+    rlTexCoord2f(1.0f, 0.0f);
+    rlVertex3f(ceil_v1.x, ceil_v1.y, ceil_v1.z);
+
+    rlTexCoord2f(1.0f, 1.0f);
+    rlVertex3f(ceil_v2.x, ceil_v2.y, ceil_v2.z);
+
+    rlTexCoord2f(0.0f, 1.0f);
+    rlVertex3f(ceil_v3.x, ceil_v3.y, ceil_v3.z);
+
+    rlEnd();
+    rlSetTexture(0);
+}
+
+void BasicRenderer::draw_textured_quad(const Vector3& v0, const Vector3& v1,
+                                        const Vector3& v2, const Vector3& v3,
+                                        const Texture2D& texture,
+                                        float u_scale, float v_scale) {
+    // Manually draw textured quad using rlgl
+    rlSetTexture(texture.id);
+
+    rlBegin(RL_QUADS);
+    rlColor4ub(255, 255, 255, 255);
+
+    // Bottom-left
+    rlTexCoord2f(0.0f, v_scale);
+    rlVertex3f(v0.x, v0.y, v0.z);
+
+    // Bottom-right
+    rlTexCoord2f(u_scale, v_scale);
+    rlVertex3f(v1.x, v1.y, v1.z);
+
+    // Top-right
+    rlTexCoord2f(u_scale, 0.0f);
+    rlVertex3f(v2.x, v2.y, v2.z);
+
+    // Top-left
+    rlTexCoord2f(0.0f, 0.0f);
+    rlVertex3f(v3.x, v3.y, v3.z);
+
+    rlEnd();
+    rlSetTexture(0);
 }
 
 } // namespace rendering
