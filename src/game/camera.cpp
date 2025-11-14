@@ -49,20 +49,28 @@ void Camera::update(const platform::InputState& input, float delta_time) {
 
     Vector3 right = Vector3Normalize(Vector3CrossProduct(forward, m_up));
 
-    // Apply movement
-    float move_speed = m_movement_speed * delta_time;
+    // Accumulate movement direction
+    Vector3 movement_dir = {0.0f, 0.0f, 0.0f};
 
     if (input.forward) {
-        m_position = Vector3Add(m_position, Vector3Scale(forward, move_speed));
+        movement_dir = Vector3Add(movement_dir, forward);
     }
     if (input.backward) {
-        m_position = Vector3Subtract(m_position, Vector3Scale(forward, move_speed));
+        movement_dir = Vector3Subtract(movement_dir, forward);
     }
     if (input.strafe_right) {
-        m_position = Vector3Add(m_position, Vector3Scale(right, move_speed));
+        movement_dir = Vector3Add(movement_dir, right);
     }
     if (input.strafe_left) {
-        m_position = Vector3Subtract(m_position, Vector3Scale(right, move_speed));
+        movement_dir = Vector3Subtract(movement_dir, right);
+    }
+
+    // Normalize to prevent faster diagonal movement
+    float movement_length = Vector3Length(movement_dir);
+    if (movement_length > 0.0f) {
+        movement_dir = Vector3Normalize(movement_dir);
+        float move_speed = m_movement_speed * delta_time;
+        m_position = Vector3Add(m_position, Vector3Scale(movement_dir, move_speed));
     }
 
     // Update target to follow position
