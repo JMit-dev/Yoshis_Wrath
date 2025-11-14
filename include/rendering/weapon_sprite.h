@@ -1,14 +1,12 @@
 #pragma once
 
-#include "rendering/texture_atlas.h"
-#include "rendering/animation_controller.h"
-#include "raylib.h"
+#include "rendering/hud_sprite.h"
 #include <memory>
 #include <string>
 
 namespace rendering {
 
-// HUD weapon sprite with animation support
+// Weapon-specific HUD sprite with attack logic
 class WeaponSprite {
 public:
     WeaponSprite();
@@ -29,19 +27,12 @@ public:
     // Check if attack animation is playing
     bool is_attacking() const;
 
-    // Set screen position (centered by default)
+    // Forward position/scale to underlying HUD sprite
     void set_position(const Vector2& position);
-
-    // Set scale
     void set_scale(float scale);
 
 private:
-    std::unique_ptr<TextureAtlas> m_atlas;
-    AnimationController m_animation_controller;
-
-    Vector2 m_position;
-    float m_scale;
-
+    std::unique_ptr<HUDSprite> m_sprite;
     std::string m_default_animation;
     std::string m_attack_animation;
 };
