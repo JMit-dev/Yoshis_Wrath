@@ -2,6 +2,9 @@
 
 #include <memory>
 #include <string>
+#include "game/game_state.h"
+#include "platform/input.h"
+#include "rendering/renderer.h"
 
 namespace core {
 
@@ -52,6 +55,10 @@ private:
     Config m_config;
     bool m_is_running;
     float m_delta_time;
+
+    std::unique_ptr<game::GameState> m_game_state;
+    std::unique_ptr<platform::RaylibInputProvider> m_input_provider;
+    std::unique_ptr<rendering::IRenderer> m_renderer;
 
     void initialize();
     void update();

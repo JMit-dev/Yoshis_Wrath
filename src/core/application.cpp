@@ -1,4 +1,5 @@
 #include "core/application.h"
+#include "game/level.h"
 #include "raylib.h"
 
 namespace core {
@@ -6,7 +7,10 @@ namespace core {
 Application::Application(const Config& config)
     : m_config(config)
     , m_is_running(false)
-    , m_delta_time(0.0f) {
+    , m_delta_time(0.0f)
+    , m_game_state(nullptr)
+    , m_input_provider(nullptr)
+    , m_renderer(nullptr) {
 }
 
 Application::~Application() {
@@ -23,24 +27,41 @@ void Application::initialize() {
     }
 
     SetTargetFPS(m_config.target_fps);
+
+    // Initialize subsystems
+    m_input_provider = std::make_unique<platform::RaylibInputProvider>();
+    m_input_provider->capture_mouse(true);
+
+    m_renderer = std::make_unique<rendering::BasicRenderer>();
+
+    m_game_state = std::make_unique<game::GameState>();
+
+    // Load test level
+    game::Level test_level = game::Level::create_test_level();
+    m_game_state->initialize(test_level);
+
     m_is_running = true;
 }
 
 void Application::update() {
     m_delta_time = GetFrameTime();
-    // TODO: Update game state here
+
+    // Get input state
+    platform::InputState input = m_input_provider->get_current_state();
+
+    // Update game state
+    m_game_state->update(m_delta_time, input);
+
+    // Handle pause
+    if (input.pause) {
+        m_game_state->set_paused(!m_game_state->is_paused());
+    }
 }
 
 void Application::render() {
-    BeginDrawing();
-    ClearBackground(RAYWHITE);
-
-    // Temporary placeholder rendering
-    DrawText("Yoshi's Wrath - Core Engine Initialized", 10, 10, 20, DARKGREEN);
-    DrawText("Press ESC to exit", 10, 40, 20, DARKGRAY);
-    DrawFPS(10, m_config.window_height - 30);
-
-    EndDrawing();
+    m_renderer->begin_frame();
+    m_renderer->render(m_game_state->get_level(), m_game_state->get_camera());
+    m_renderer->end_frame();
 }
 
 void Application::cleanup() {
