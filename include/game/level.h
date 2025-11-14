@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include <vector>
 #include <cstdint>
+#include <memory>
 
 namespace game {
 
@@ -10,6 +11,7 @@ namespace game {
 struct Sector;
 struct Wall;
 struct Portal;
+class BSPTree;
 
 // A 2D vertex in the level
 struct Vertex {
@@ -83,18 +85,30 @@ struct EntitySpawn {
 class Level {
 public:
     Level();
-    ~Level() = default;
+    ~Level();
+
+    // Delete copy constructor and assignment (has unique_ptr members)
+    Level(const Level&) = delete;
+    Level& operator=(const Level&) = delete;
+
+    // Allow move
+    Level(Level&&) = default;
+    Level& operator=(Level&&) = default;
 
     // Level building (for now, manual - editor will come later)
     uint32_t add_sector(const Sector& sector);
     uint32_t add_portal(const Portal& portal);
     void add_entity_spawn(const EntitySpawn& spawn);
 
+    // Build BSP tree for the level (call after adding all sectors)
+    void build_bsp();
+
     // Getters
     const std::vector<Sector>& get_sectors() const { return m_sectors; }
     const std::vector<Portal>& get_portals() const { return m_portals; }
     const std::vector<EntitySpawn>& get_spawns() const { return m_entity_spawns; }
     const Sector& get_sector(uint32_t index) const { return m_sectors[index]; }
+    const BSPTree* get_bsp_tree() const { return m_bsp_tree.get(); }
 
     // Find which sector contains a point
     int32_t find_sector_at_point(float x, float z) const;
@@ -106,6 +120,7 @@ private:
     std::vector<Sector> m_sectors;
     std::vector<Portal> m_portals;
     std::vector<EntitySpawn> m_entity_spawns;
+    std::unique_ptr<BSPTree> m_bsp_tree;
 
     bool point_in_sector(const Sector& sector, float x, float z) const;
 };

@@ -14,8 +14,8 @@ public:
     GameState();
     ~GameState() = default;
 
-    // Initialize game with a level
-    void initialize(const Level& level);
+    // Initialize game with a level (takes ownership via move)
+    void initialize(Level&& level);
 
     // Update game state
     void update(float delta_time, const platform::InputState& input);

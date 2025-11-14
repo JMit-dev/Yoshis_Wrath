@@ -36,9 +36,8 @@ void Application::initialize() {
 
     m_game_state = std::make_unique<game::GameState>();
 
-    // Load test level
-    game::Level test_level = game::Level::create_test_level();
-    m_game_state->initialize(test_level);
+    // Load test level and move it into game state
+    m_game_state->initialize(game::Level::create_test_level());
 
     m_is_running = true;
 }

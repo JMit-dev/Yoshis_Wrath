@@ -1,10 +1,14 @@
 #include "game/level.h"
+#include "game/bsp.h"
 #include <cmath>
 
 namespace game {
 
-Level::Level() {
+Level::Level()
+    : m_bsp_tree(nullptr) {
 }
+
+Level::~Level() = default;
 
 uint32_t Level::add_sector(const Sector& sector) {
     m_sectors.push_back(sector);
@@ -18,6 +22,11 @@ uint32_t Level::add_portal(const Portal& portal) {
 
 void Level::add_entity_spawn(const EntitySpawn& spawn) {
     m_entity_spawns.push_back(spawn);
+}
+
+void Level::build_bsp() {
+    m_bsp_tree = std::make_unique<BSPTree>();
+    m_bsp_tree->build_from_level(*this);
 }
 
 int32_t Level::find_sector_at_point(float x, float z) const {
@@ -87,6 +96,9 @@ Level Level::create_test_level() {
     player_spawn.entity_type = 0;  // Player
     player_spawn.rotation = 0.0f;
     level.add_entity_spawn(player_spawn);
+
+    // Build BSP tree
+    level.build_bsp();
 
     return level;
 }

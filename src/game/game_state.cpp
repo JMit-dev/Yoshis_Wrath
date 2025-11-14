@@ -1,4 +1,5 @@
 #include "game/game_state.h"
+#include "game/bsp.h"
 
 namespace game {
 
@@ -6,8 +7,8 @@ GameState::GameState()
     : m_is_paused(false) {
 }
 
-void GameState::initialize(const Level& level) {
-    m_level = level;
+void GameState::initialize(Level&& level) {
+    m_level = std::move(level);
 
     // Set camera to player spawn point if available
     const auto& spawns = m_level.get_spawns();

@@ -1,4 +1,5 @@
 #include "rendering/renderer.h"
+#include "game/bsp.h"
 #include "raymath.h"
 
 namespace rendering {
@@ -20,10 +21,24 @@ void BasicRenderer::render(const game::Level& level, const game::Camera& camera)
 
     BeginMode3D(raylib_camera);
 
-    // Render all sectors (simple approach for now, BSP traversal will come later)
     const auto& sectors = level.get_sectors();
-    for (const auto& sector : sectors) {
-        render_sector(sector);
+
+    // Use BSP tree if available for optimized rendering
+    if (level.get_bsp_tree() && level.get_bsp_tree()->is_built()) {
+        std::vector<uint32_t> visible_sectors;
+        level.get_bsp_tree()->get_visible_sectors(camera.get_position(), visible_sectors);
+
+        // Render visible sectors in BSP order
+        for (uint32_t idx : visible_sectors) {
+            if (idx < sectors.size()) {
+                render_sector(sectors[idx]);
+            }
+        }
+    } else {
+        // Fallback: render all sectors
+        for (const auto& sector : sectors) {
+            render_sector(sector);
+        }
     }
 
     // Draw a grid for reference
@@ -32,7 +47,7 @@ void BasicRenderer::render(const game::Level& level, const game::Camera& camera)
     EndMode3D();
 
     // Draw HUD
-    DrawText("Yoshi's Wrath - Engine Test", 10, 10, 20, GREEN);
+    DrawText("Yoshi's Wrath - BSP Engine", 10, 10, 20, GREEN);
     DrawText("WASD: Move | Mouse: Look | ESC: Exit", 10, 40, 16, LIGHTGRAY);
     DrawFPS(10, GetScreenHeight() - 30);
 }
