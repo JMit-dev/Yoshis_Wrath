@@ -7,7 +7,8 @@
 namespace rendering {
 
 BasicRenderer::BasicRenderer()
-    : m_texture_manager(std::make_unique<TextureManager>()) {
+    : m_texture_manager(std::make_unique<TextureManager>())
+    , m_hud(std::make_unique<HUD>()) {
 }
 
 void BasicRenderer::begin_frame() {
@@ -40,9 +41,7 @@ void BasicRenderer::render(const game::Level& level, const game::Camera& camera)
     EndMode3D();
 
     // Draw HUD
-    DrawText("Yoshi's Wrath - BSP Engine", 10, 10, 20, GREEN);
-    DrawText("WASD: Move | Mouse: Look | ESC: Exit", 10, 40, 16, LIGHTGRAY);
-    DrawFPS(10, GetScreenHeight() - 30);
+    m_hud->render();
 }
 
 void BasicRenderer::render_sector(const game::Sector& sector) {

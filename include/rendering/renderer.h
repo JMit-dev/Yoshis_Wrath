@@ -4,6 +4,7 @@
 #include "game/camera.h"
 #include "rendering/texture_manager.h"
 #include "rendering/sprite.h"
+#include "rendering/hud.h"
 #include "raylib.h"
 #include <memory>
 #include <vector>
@@ -37,6 +38,7 @@ public:
 
 private:
     std::unique_ptr<TextureManager> m_texture_manager;
+    std::unique_ptr<HUD> m_hud;
 
     void render_sector(const game::Sector& sector);
     void render_wall(const game::Sector& sector, const game::Wall& wall);
