@@ -51,6 +51,15 @@ void Application::update() {
     // Update game state
     m_game_state->update(m_delta_time, input);
 
+    // Update weapon animation (cast to BasicRenderer to access weapon methods)
+    auto* basic_renderer = static_cast<rendering::BasicRenderer*>(m_renderer.get());
+    basic_renderer->update_weapon(m_delta_time);
+
+    // Handle weapon attack
+    if (input.shoot) {
+        basic_renderer->trigger_weapon_attack();
+    }
+
     // Handle pause
     if (input.pause) {
         m_game_state->set_paused(!m_game_state->is_paused());

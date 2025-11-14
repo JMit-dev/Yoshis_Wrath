@@ -6,6 +6,7 @@
 #include "rendering/sprite.h"
 #include "rendering/hud.h"
 #include "rendering/sector_renderer.h"
+#include "rendering/weapon_sprite.h"
 #include "raylib.h"
 #include <memory>
 #include <vector>
@@ -37,10 +38,15 @@ public:
     void begin_frame() override;
     void end_frame() override;
 
+    // Weapon controls
+    void trigger_weapon_attack();
+    void update_weapon(float delta_time);
+
 private:
     std::unique_ptr<TextureManager> m_texture_manager;
     std::unique_ptr<HUD> m_hud;
     std::unique_ptr<SectorRenderer> m_sector_renderer;
+    std::unique_ptr<WeaponSprite> m_weapon_sprite;
 
     void render_sprite(const Sprite& sprite, const game::Camera& camera);
 

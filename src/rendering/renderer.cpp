@@ -9,7 +9,10 @@ namespace rendering {
 BasicRenderer::BasicRenderer()
     : m_texture_manager(std::make_unique<TextureManager>())
     , m_hud(std::make_unique<HUD>())
-    , m_sector_renderer(std::make_unique<SectorRenderer>(*m_texture_manager)) {
+    , m_sector_renderer(std::make_unique<SectorRenderer>(*m_texture_manager))
+    , m_weapon_sprite(std::make_unique<WeaponSprite>()) {
+    // Load weapon sprite
+    m_weapon_sprite->load_from_json("sprites/weapon_fist.json");
 }
 
 void BasicRenderer::begin_frame() {
@@ -41,8 +44,17 @@ void BasicRenderer::render(const game::Level& level, const game::Camera& camera)
 
     EndMode3D();
 
-    // Draw HUD
+    // Draw HUD and weapon
     m_hud->render();
+    m_weapon_sprite->render();
+}
+
+void BasicRenderer::trigger_weapon_attack() {
+    m_weapon_sprite->trigger_attack();
+}
+
+void BasicRenderer::update_weapon(float delta_time) {
+    m_weapon_sprite->update(delta_time);
 }
 
 void BasicRenderer::draw_textured_quad(const Vector3& v0, const Vector3& v1,

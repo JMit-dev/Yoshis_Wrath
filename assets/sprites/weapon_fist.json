@@ -1,0 +1,21 @@
+{
+  "name": "weapon_fist",
+  "atlas": "sprites/weapon_fist_sheet.png",
+  "frame_width": 128,
+  "frame_height": 128,
+  "frames_horizontal": 4,
+  "frames_vertical": 1,
+  "animations": {
+    "idle": {
+      "frames": [0],
+      "frame_duration": 0.1,
+      "looping": true
+    },
+    "punch": {
+      "frames": [0, 1, 2, 3, 2, 1, 0],
+      "frame_duration": 0.05,
+      "looping": false
+    }
+  },
+  "default_animation": "idle"
+}
