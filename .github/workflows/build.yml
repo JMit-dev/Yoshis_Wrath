@@ -40,7 +40,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -77,14 +77,14 @@ jobs:
 
       - name: Upload artifact (Windows)
         if: matrix.platform == 'Windows'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.package_name }}
           path: ${{ matrix.package_name }}.zip
 
       - name: Upload artifact (Linux/macOS)
         if: matrix.platform != 'Windows'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.package_name }}
           path: ${{ matrix.package_name }}.tar.gz
