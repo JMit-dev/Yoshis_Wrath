@@ -43,9 +43,11 @@ target_compile_definitions(yoshis_wrath PUBLIC
     ASSETS_PATH="./assets/")
 
 # Copy assets to build directory (for development)
-add_custom_command(TARGET yoshis_wrath POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_CURRENT_SOURCE_DIR}/assets
-    $<TARGET_FILE_DIR:yoshis_wrath>/assets
-    COMMENT "Copying assets to build directory"
-)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/assets)
+    add_custom_command(TARGET yoshis_wrath POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/assets
+        $<TARGET_FILE_DIR:yoshis_wrath>/assets
+        COMMENT "Copying assets to build directory"
+    )
+endif()
