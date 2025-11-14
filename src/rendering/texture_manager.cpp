@@ -1,4 +1,5 @@
 #include "rendering/texture_manager.h"
+#include "platform/file_system.h"
 #include <stdexcept>
 
 namespace rendering {
@@ -29,8 +30,10 @@ uint32_t TextureManager::load_texture(const std::string& path) {
         return it->second;
     }
 
-    // Try to load the texture
-    Texture2D texture = LoadTexture(path.c_str());
+    // Try to load the texture using platform-agnostic path
+    std::string full_path = platform::FileSystem::join_path(
+        platform::FileSystem::get_assets_path(), path);
+    Texture2D texture = LoadTexture(full_path.c_str());
 
     // If loading failed, return default texture
     if (texture.id == 0) {
