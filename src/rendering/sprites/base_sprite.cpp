@@ -1,4 +1,4 @@
-#include "rendering/base_sprite.h"
+#include "rendering/sprites/base_sprite.h"
 
 namespace rendering {
 

@@ -2,11 +2,11 @@
 
 #include "game/level.h"
 #include "game/camera.h"
-#include "rendering/texture_manager.h"
-#include "rendering/sprite.h"
-#include "rendering/hud.h"
-#include "rendering/sector_renderer.h"
-#include "rendering/weapon_sprite.h"
+#include "rendering/textures/texture_manager.h"
+#include "rendering/sprites/sprite.h"
+#include "rendering/core/hud.h"
+#include "rendering/scene/sector_renderer.h"
+#include "rendering/sprites/weapon_sprite.h"
 #include "raylib.h"
 #include <memory>
 #include <vector>

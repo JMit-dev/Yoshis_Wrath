@@ -1,4 +1,4 @@
-#include "rendering/animation_controller.h"
+#include "rendering/animation/animation_controller.h"
 
 namespace rendering {
 

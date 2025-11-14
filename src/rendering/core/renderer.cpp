@@ -1,4 +1,4 @@
-#include "rendering/renderer.h"
+#include "rendering/core/renderer.h"
 #include "game/bsp.h"
 #include "raymath.h"
 #include "rlgl.h"

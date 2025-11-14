@@ -1,4 +1,4 @@
-#include "rendering/hud_sprite.h"
+#include "rendering/sprites/hud_sprite.h"
 #include "platform/file_system.h"
 #include "raylib.h"
 #include <fstream>

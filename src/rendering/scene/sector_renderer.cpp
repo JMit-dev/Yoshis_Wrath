@@ -1,4 +1,4 @@
-#include "rendering/sector_renderer.h"
+#include "rendering/scene/sector_renderer.h"
 
 namespace rendering {
 

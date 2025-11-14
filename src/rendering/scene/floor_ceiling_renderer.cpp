@@ -1,4 +1,4 @@
-#include "rendering/floor_ceiling_renderer.h"
+#include "rendering/scene/floor_ceiling_renderer.h"
 #include "rlgl.h"
 
 namespace rendering {

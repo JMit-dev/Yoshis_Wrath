@@ -1,4 +1,4 @@
-#include "rendering/hud.h"
+#include "rendering/core/hud.h"
 #include "raylib.h"
 
 namespace rendering {

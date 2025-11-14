@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rendering/hud_sprite.h"
+#include "rendering/sprites/hud_sprite.h"
 #include <memory>
 #include <string>
 

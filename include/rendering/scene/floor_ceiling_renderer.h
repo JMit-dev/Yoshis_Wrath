@@ -2,7 +2,7 @@
 
 #include "raylib.h"
 #include "game/level.h"
-#include "rendering/texture_manager.h"
+#include "rendering/textures/texture_manager.h"
 
 namespace rendering {
 

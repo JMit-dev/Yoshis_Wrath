@@ -1,8 +1,8 @@
 #pragma once
 
 #include "game/level.h"
-#include "rendering/wall_renderer.h"
-#include "rendering/floor_ceiling_renderer.h"
+#include "rendering/scene/wall_renderer.h"
+#include "rendering/scene/floor_ceiling_renderer.h"
 #include <memory>
 
 namespace rendering {

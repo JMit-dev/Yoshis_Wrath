@@ -1,4 +1,4 @@
-#include "rendering/texture_atlas.h"
+#include "rendering/textures/texture_atlas.h"
 #include "platform/file_system.h"
 #include "raylib.h"
 

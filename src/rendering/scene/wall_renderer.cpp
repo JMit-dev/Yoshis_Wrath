@@ -1,4 +1,4 @@
-#include "rendering/wall_renderer.h"
+#include "rendering/scene/wall_renderer.h"
 #include "rlgl.h"
 #include <cmath>
 

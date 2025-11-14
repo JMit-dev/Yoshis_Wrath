@@ -1,4 +1,4 @@
-#include "rendering/weapon_sprite.h"
+#include "rendering/sprites/weapon_sprite.h"
 
 namespace rendering {
 

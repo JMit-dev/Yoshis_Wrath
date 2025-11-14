@@ -1,7 +1,7 @@
 #pragma once
 
-#include "rendering/texture_atlas.h"
-#include "rendering/animation_controller.h"
+#include "rendering/textures/texture_atlas.h"
+#include "rendering/animation/animation_controller.h"
 #include "raylib.h"
 #include <memory>
 

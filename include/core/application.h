@@ -4,7 +4,7 @@
 #include <string>
 #include "game/game_state.h"
 #include "platform/input.h"
-#include "rendering/renderer.h"
+#include "rendering/core/renderer.h"
 
 namespace core {
 

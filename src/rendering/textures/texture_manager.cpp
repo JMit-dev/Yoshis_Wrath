@@ -1,4 +1,4 @@
-#include "rendering/texture_manager.h"
+#include "rendering/textures/texture_manager.h"
 #include "platform/file_system.h"
 #include <stdexcept>
 

@@ -1,4 +1,4 @@
-#include "rendering/billboard_sprite.h"
+#include "rendering/sprites/billboard_sprite.h"
 #include "platform/file_system.h"
 #include "raymath.h"
 #include "raylib.h"

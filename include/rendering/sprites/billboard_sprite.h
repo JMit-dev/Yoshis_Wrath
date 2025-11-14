@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rendering/base_sprite.h"
+#include "rendering/sprites/base_sprite.h"
 #include "game/camera.h"
 #include "raylib.h"
 
