@@ -1,4 +1,5 @@
 #include "rendering/weapon_sprite.h"
+#include "platform/file_system.h"
 #include "raylib.h"
 #include "rlgl.h"
 #include <sstream>
@@ -15,8 +16,9 @@ WeaponSprite::WeaponSprite()
 }
 
 bool WeaponSprite::load_from_json(const std::string& json_path) {
-    // Load JSON file
-    std::string full_path = std::string(ASSETS_PATH) + json_path;
+    // Load JSON file using platform-agnostic path
+    std::string full_path = platform::FileSystem::join_path(
+        platform::FileSystem::get_assets_path(), json_path);
     std::ifstream file(full_path);
     if (!file.is_open()) {
         return false;

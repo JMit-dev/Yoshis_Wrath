@@ -1,4 +1,5 @@
 #include "rendering/texture_atlas.h"
+#include "platform/file_system.h"
 #include "raylib.h"
 
 namespace rendering {
@@ -20,8 +21,10 @@ TextureAtlas::~TextureAtlas() {
 
 bool TextureAtlas::load(const std::string& path, int frame_width, int frame_height,
                         int frames_horizontal, int frames_vertical) {
-    // Load texture from file
-    m_texture = LoadTexture((std::string(ASSETS_PATH) + path).c_str());
+    // Load texture from file using platform-agnostic path
+    std::string full_path = platform::FileSystem::join_path(
+        platform::FileSystem::get_assets_path(), path);
+    m_texture = LoadTexture(full_path.c_str());
 
     if (m_texture.id == 0) {
         return false;
