@@ -48,7 +48,13 @@ private:
     std::unique_ptr<SectorRenderer> m_sector_renderer;
     std::unique_ptr<WeaponSprite> m_weapon_sprite;
 
+    RenderTexture2D m_render_target;  // Fixed resolution render target
+    int m_render_width;                // Target render width
+    int m_render_height;               // Target render height
+
     void render_sprite(const Sprite& sprite, const game::Camera& camera);
+    void update_render_target();       // Update render target on window resize
+    void update_ui_scaling();          // Update UI element positions based on render size
 
     // Helper to draw a textured quad for sprites
     void draw_textured_quad(const Vector3& v0, const Vector3& v1,

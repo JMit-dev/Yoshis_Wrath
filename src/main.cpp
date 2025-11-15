@@ -4,8 +4,8 @@ int main() {
     // Configure application
     core::Application::Config config;
     config.window_title = "Yoshi's Wrath";
-    config.window_width = 1280;
-    config.window_height = 720;
+    config.window_width = 1920;  // Default to 1080p widescreen
+    config.window_height = 1080;
     config.target_fps = 60;
     config.fullscreen = false;
 

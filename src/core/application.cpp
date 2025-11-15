@@ -26,6 +26,9 @@ void Application::initialize() {
         InitWindow(m_config.window_width, m_config.window_height, m_config.window_title.c_str());
     }
 
+    // Make window resizable
+    SetWindowState(FLAG_WINDOW_RESIZABLE);
+
     SetTargetFPS(m_config.target_fps);
 
     // Initialize subsystems
